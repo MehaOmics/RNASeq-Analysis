@@ -1,10 +1,13 @@
+##This code is for downstreaming plotting of data from output of DeSeq2 tool 
 library(ggplot2)
 library(EnhancedVolcano)
 library(pheatmap)
 library(RColorBrewer)
+library(viridis)
 
+# Load DESeq2 results and normalized counts
 # ========================
-# PCA Plot (from Deseq2)
+# PCA Plot (object dds from Deseq2) 
 # ========================
 vsdata <- vst(dds, blind = FALSE)
 
@@ -27,7 +30,7 @@ print(pca_plot)
 dev.off()
 
 # ========================
-#Volcano Plot (from DeSeq2)
+#Volcano Plot (resLFC_df is a DESeqResults object with shrunken log2 fold changes for each gene) 
 # ========================
 ##Filter DEGs
 padj.cutoff <- 0.05
@@ -56,6 +59,7 @@ volcano <- ggplot(resLFC_df, aes(x = log2FoldChange, y = -log10(padj), color = s
 # ========================
 #  Heatmap of Significant Genes (from DeSeq2)
 # ========================
+normalized_counts <- counts(dds, normalized = TRUE)
 sig_genes <- sig_degs$transcript_id
 heat_data <- normalized_counts[sig_genes, ]
 
@@ -63,7 +67,7 @@ heat_data <- normalized_counts[sig_genes, ]
 heat_data_scaled <- t(scale(t(heat_data)))
 
 # Save PNG at high resolution
-png("./Heatmapviridis.png",
+png("Heatmapviridis.png",
     width = 5000, height = 3500, res = 600)
 
 heatmap <- pheatmap(heat_data_scaled,
