@@ -4,6 +4,30 @@ library(pheatmap)
 library(RColorBrewer)
 
 # ========================
+# PCA Plot (from Deseq2)
+# ========================
+vsdata <- vst(dds, blind = FALSE)
+
+# Extract PCA data and percent variance
+pcaData <- plotPCA(vsdata, intgroup = "condition", returnData = TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+
+
+
+# Plot with compact axes
+png("PCA.png", width = 4000, height = 3000, res = 600)
+pca_plot <- ggplot(pcaData, aes(x = PC1, y = PC2, color = condition)) +
+  geom_point(size = 4, alpha = 0.8) +
+  scale_color_brewer(palette = "Set1") +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  ggtitle("PCA Plot - Below vs Above") +
+  theme_classic()
+
+print(pca_plot)
+dev.off()
+
+# ========================
 #Volcano Plot (from DeSeq2)
 # ========================
 resLFC_df <- resLFC_df %>%
