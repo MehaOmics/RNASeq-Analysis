@@ -13,7 +13,6 @@ pcaData <- plotPCA(vsdata, intgroup = "condition", returnData = TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 
 
-
 # Plot with compact axes
 png("PCA.png", width = 4000, height = 3000, res = 600)
 pca_plot <- ggplot(pcaData, aes(x = PC1, y = PC2, color = condition)) +
@@ -21,7 +20,7 @@ pca_plot <- ggplot(pcaData, aes(x = PC1, y = PC2, color = condition)) +
   scale_color_brewer(palette = "Set1") +
   xlab(paste0("PC1: ", percentVar[1], "% variance")) +
   ylab(paste0("PC2: ", percentVar[2], "% variance")) +
-  ggtitle("PCA Plot - Below vs Above") +
+  ggtitle("PCA Plot") +
   theme_classic()
 
 print(pca_plot)
@@ -30,12 +29,17 @@ dev.off()
 # ========================
 #Volcano Plot (from DeSeq2)
 # ========================
+##Filter DEGs
+padj.cutoff <- 0.05
+lfc.cutoff <- 1
 resLFC_df <- resLFC_df %>%
   mutate(significance = case_when(
     padj < padj.cutoff & log2FoldChange > lfc.cutoff ~ "Upregulated",
     padj < padj.cutoff & log2FoldChange < -lfc.cutoff ~ "Downregulated",
     TRUE ~ "Not Significant"
   ))
+sig_degs <- resLFC_df %>% filter(Significance == 1)
+
 png("Volcano_plot.png", width = 4000, height = 3000, res = 600)
 
 volcano <- ggplot(resLFC_df, aes(x = log2FoldChange, y = -log10(padj), color = significance)) +
@@ -44,7 +48,7 @@ volcano <- ggplot(resLFC_df, aes(x = log2FoldChange, y = -log10(padj), color = s
   geom_vline(xintercept = c(-lfc.cutoff, lfc.cutoff), linetype = "dashed") +
   geom_hline(yintercept = -log10(padj.cutoff), linetype = "dashed") +
   labs(
-    title = "Volcano Plot (Below vs Above Ground Tissues)",
+    title = "Volcano Plot",
     x = "Log2 Fold Change",
     y = "-Log10 Adjusted p-value"
   ) +
